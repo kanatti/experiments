@@ -1,32 +1,88 @@
-use libc;
-use std::env;
+use libc::{self, S_IFDIR, S_IFLNK, S_IFMT, S_IFREG, S_IFSOCK};
+use pico_args::Arguments;
 use std::ffi::CString;
 use std::io;
 
+const STAT_HELP: &str = "\
+fs-wrap stat
+
+USAGE:
+  fs-wrap stat [OPTIONS] [PATH]
+
+FLAGS:
+  -h, --help       Prints help information
+
+OPTIONS:
+  --extended       Show extended info (calls statx)
+
+ARGS:
+  <PATH>           Path to file.
+";
+
+const ASK_FOR_HELP: &str = "Get help: fs-wrap stat --help";
+
+#[derive(Debug)]
+struct AppArgs {
+    extended: bool,
+    path: String,
+}
+
+type PicoError = pico_args::Error;
+
 fn main() {
-    let args: Vec<String> = env::args().skip(1).collect();
-    let command = args
-        .first()
-        .unwrap_or_else(|| {
-            println!("No command provided");
-            std::process::exit(1)
-        })
-        .as_str();
+    let mut pargs = Arguments::from_env();
 
-    match command {
-        "stat" => {
-            let path = args
-                .get(1)
-                .unwrap_or_else(|| {
-                    println!("No path provided");
-                    std::process::exit(1)
-                })
-                .as_str();
+    let command = ok_or_exit(pargs.subcommand());
 
-            stat(path);
+    match command.as_deref() {
+        Some("stat") => {
+            let args = ok_or_exit(parse_args(&mut pargs));
+
+            if args.path.is_empty() {
+                println!("No path provided");
+                print!("{}", ASK_FOR_HELP);
+                std::process::exit(1);
+            }
+
+            if args.extended {
+                println!("Extended Stats");
+            }
+
+            stat(&args.path)
         }
-        _ => println!("Unknown command - {}", command),
+        Some(other) => {
+            eprintln!("Unknown command - {}", other);
+            print!("{}", ASK_FOR_HELP);
+        }
+        None => {
+            eprintln!("No commands provided");
+            print!("{}", ASK_FOR_HELP);
+        }
     }
+}
+
+fn ok_or_exit<T>(result: Result<T, PicoError>) -> T {
+    match result {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("Error: {}.", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+fn parse_args(pargs: &mut Arguments) -> Result<AppArgs, PicoError> {
+    if pargs.contains(["-h", "--help"]) {
+        print!("{}", STAT_HELP);
+        std::process::exit(0);
+    }
+
+    let args = AppArgs {
+        extended: pargs.contains("--extended"),
+        path: pargs.free_from_str()?,
+    };
+
+    Ok(args)
 }
 
 fn stat(path: &str) {
@@ -41,26 +97,46 @@ fn stat(path: &str) {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct Stat {
-    device: u64,
+    device: u64, // Identified by Major and Minor IDs
     inode: u64,
-    file_type: u32,
+    file_type: FileType,
     hard_links: u32,
     uid: u32,
     gid: u32,
-    size: i64,
-    block_size: i32,
-    blocks: i64,
+    size: i64,       // Bytes
+    block_size: i32, // Optimal block size for reading
+    blocks: i64,     // 512-byte blocks
     atime: i64,
     mtime: i64,
     ctime: i64,
+}
+
+#[derive(Debug)]
+enum FileType {
+    Directory,
+    RegularFile,
+    SymLink,
+    Socket,
+    Other,
+}
+
+fn file_type(st_mode: u32) -> FileType {
+    match st_mode & S_IFMT {
+        S_IFDIR => FileType::Directory,
+        S_IFREG => FileType::RegularFile,
+        S_IFLNK => FileType::SymLink,
+        S_IFSOCK => FileType::Socket,
+        _ => FileType::Other,
+    }
 }
 
 fn show_stat(buf: libc::stat) {
     let stats = Stat {
         device: buf.st_dev,
         inode: buf.st_ino,
-        file_type: buf.st_mode,
+        file_type: file_type(buf.st_mode),
         hard_links: buf.st_nlink,
         uid: buf.st_uid,
         gid: buf.st_gid,
@@ -72,5 +148,5 @@ fn show_stat(buf: libc::stat) {
         ctime: buf.st_ctime,
     };
 
-    println!("Stats: {:?}", stats);
+    println!("{:#?}", stats);
 }
