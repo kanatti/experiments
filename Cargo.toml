@@ -1,2 +1,2 @@
 [workspace]
-members = [ "fsfs", "fs-wrap", "strsplit"]
+members = [ "fsfs", "fs-wrap", "strsplit", "vecmac"]
