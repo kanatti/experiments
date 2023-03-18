@@ -1,5 +1,5 @@
 //! Splits a string
-#![warn(missing_debug_implementations, rust_2018_idioms)]
+#![warn(missing_debug_implementations)]
 
 pub trait Delimiter {
     /// Returns Option<(start, end)>

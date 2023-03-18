@@ -16,20 +16,20 @@ macro_rules! avec {
         vs
     }};
 
-    (@COUNT; $($element:expr),+) => {
+    (@COUNT; $($element:expr),+) => { 
         <[()]>::len(&[$($crate::avec![@SUBST; $element]),+])
     };
 
     (@SUBST; $element:expr) => { () }
 }
 
-trait MaxValue {
+pub trait MaxValue {
     fn max_value() -> Self;
 }
 
 macro_rules! max_impl {
     ($t:ty) => {
-        impl $crate::MaxValue for $t {
+        impl MaxValue for $t {
             fn max_value() -> Self {
                 <$t>::MAX
             }
