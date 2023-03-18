@@ -13,7 +13,10 @@
 				"serayuzgur.crates",
 				"tamasfe.even-better-toml",
 				"vadimcn.vscode-lldb"
-			]
+			],
+			"settings": {
+				"rust-analyzer.inlayHints.typeHints.enable": false
+			}
 		}
 	}
 	// Use 'mounts' to make the cargo cache persistent in a Docker Volume.
