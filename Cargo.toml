@@ -1,2 +1,2 @@
 [workspace]
-members = [ "fsfs", "fs-wrap", "cor"]
+members = [ "fsfs", "cor"]
