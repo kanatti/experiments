@@ -1,2 +1,2 @@
 # experiments
-Experimenting with Rust
+Experimenting with C and Rust

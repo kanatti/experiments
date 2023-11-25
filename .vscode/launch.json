@@ -40,6 +40,13 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "showip",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/networking/showip",
+            "args": ["google.com"]
         }
     ]
 }

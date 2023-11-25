@@ -1,6 +1,3 @@
-# Output directory
-BUILD_DIR := build
-
 # Executables
 EXECUTABLES := showip
 
@@ -14,19 +11,18 @@ CFLAGS?= -O2 -Wall -W -DSDS_ABORT_ON_OOM
 # Combine compiler flags
 CCOPT= $(CFLAGS)
 
+# Dependencies
+showip: showip.o
+
 # Targets
-all:  $(addprefix $(BUILD_DIR)/, $(EXECUTABLES))
+all:  $(EXECUTABLES)
 	@echo "Building" $(EXECUTABLES)
 
-$(BUILD_DIR)/%: $(BUILD_DIR)/%.o
+$(SRC_DIR)/%: $(SRC_DIR)/%.o
 	$(CC) $(CCOPT) $(DEBUG) $(COMPILE_TIME) $< -o $@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) -c $(CCOPT) $(DEBUG) $(COMPILE_TIME) $< -o $@
-
-# Make build dir if not present
-$(BUILD_DIR):
-	mkdir -p $@
 
 # List of all dependencies
 dep:
@@ -34,4 +30,4 @@ dep:
 
 # Clean build and object files
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(EXECUTABLES) *.o
