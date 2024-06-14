@@ -1,5 +1,5 @@
 # Executables
-EXECUTABLES := showip
+EXECUTABLES := showip sockaddr_align server
 
 # Source directory
 SRC_DIR := .
@@ -11,12 +11,14 @@ CFLAGS?= -O2 -Wall -W -DSDS_ABORT_ON_OOM
 # Combine compiler flags
 CCOPT= $(CFLAGS)
 
-# Dependencies
-showip: showip.o
-
 # Targets
 all:  $(EXECUTABLES)
 	@echo "Building" $(EXECUTABLES)
+
+# Dependencies
+showip: showip.o
+sockaddr_align: sockaddr_align.o
+server: server.o
 
 $(SRC_DIR)/%: $(SRC_DIR)/%.o
 	$(CC) $(CCOPT) $(DEBUG) $(COMPILE_TIME) $< -o $@

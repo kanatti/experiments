@@ -1,2 +1,2 @@
 [workspace]
-members = [ "fsfs", "cor"]
+members = ["fsfs", "cor", "external/*"]
