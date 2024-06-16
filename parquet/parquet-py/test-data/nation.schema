@@ -1,0 +1,6 @@
+message m {
+  OPTIONAL INT32 nation_key;
+  OPTIONAL BYTE_ARRAY name (UTF8);
+  OPTIONAL INT32 region_key;
+  OPTIONAL BYTE_ARRAY comment_col (UTF8);
+}
