@@ -1,6 +1,10 @@
 from .parquet.ttypes import FileMetaData
+from . import exceptions
+
 from thrift.protocol import TCompactProtocol
 from thrift.transport import TTransport
+import os
+from pathlib import Path
 
 # Parquet files start and end with this magic bytes.
 MAGIC = b'PAR1'
@@ -42,25 +46,32 @@ def _read_metadata(file):
 
     return metadata
 
-def print_metadata(m: FileMetaData):
+def _print_metadata(m: FileMetaData):
     print(f"version: {m.version}")
     print(f"num_rows: {m.num_rows}")
     print(f"created_by: {m.created_by}")
     print(f"schema: {m.schema}")
-    # m.row_groups
-    # m.key_value_metadata
-    # m.column_orders
-    # m.encryption_algorithm
-    # m.footer_signing_key_metadata
+    print(f"key_value_metadata: {m.key_value_metadata}")
+    print(f"column_orders: {m.column_orders}")
+    print(f"row_groups: {m.row_groups}")
+    print(f"encryption_algorithm: {m.encryption_algorithm}")
+    print(f"footer_signing_key_metadata: {m.footer_signing_key_metadata}")
+
+
+def _project_dir() -> Path:
+    return Path(__file__).parent.parent.parent
+
+def _test_data(filename):
+    return os.path.join(_project_dir(), "test-data", filename)
 
 def read_example():
-    sample_parquet = "/Users/balu/Code/experiments/parquet/parquet-py/test-data/nation.parquet"
+    sample_parquet = _test_data("nation.parquet")
+
     with open(sample_parquet, 'rb') as f:
         if not _check_magic_header(f):
-            raise Exception("Invalid Parquet file")
+            raise exceptions.InvalidParquetFile("Missing header magic")
         if not _check_magic_footer(f):
-            raise Exception("Invalid Parquet file")
-        print("Valid Parquet header and footer")
+            raise exceptions.InvalidParquetFile("Missing footer magic")
         print("Reading metadata")
         metadata = _read_metadata(f)
-        print_metadata(metadata)
+        _print_metadata(metadata)
