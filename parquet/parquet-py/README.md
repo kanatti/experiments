@@ -1,3 +1,4 @@
 # parquet-py
 
-Describe your project here.
+Parquet implementation in python, for learning purposes.
+

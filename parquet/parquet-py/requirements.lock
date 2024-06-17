@@ -9,3 +9,7 @@
 #   generate-hashes: false
 
 -e file:.
+six==1.16.0
+    # via thrift
+thrift==0.20.0
+    # via parquet-py

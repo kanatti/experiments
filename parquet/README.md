@@ -19,6 +19,12 @@ This will be more of a hands-on learning instead of just reading through docs/co
 7. Diagramming and write blogs.
 
 
+## Thrift bootstrapping
+
+```sh
+thrift -r --gen py --out src/parquet_py/ src/parquet_py/parquet.thrift
+```
+
 
 ## Parquet Concepts
 

@@ -5,7 +5,9 @@ description = "Add your description here"
 authors = [
     { name = "Balagopal Kanattil", email = "balukanattil@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "thrift>=0.20.0",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
