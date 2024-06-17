@@ -72,6 +72,13 @@ def _read_offset_index(file, cc: ttypes.ColumnChunk) -> ttypes.OffsetIndex:
     index = _read_thrift_structure(file, ttypes.OffsetIndex)
     return index
 
+def print_page_header(file, offset):
+    file.seek(offset)
+    header = _read_thrift_structure(file, ttypes.PageHeader)
+    print(header)
+    print()
+
+
 def read_example():
     sample_parquet = _test_data("nation.parquet")
 
@@ -85,9 +92,19 @@ def read_example():
 
         print("\n--- index ---\n")
         for row_group in metadata.row_groups:
-            for column_chunk in row_group.columns:
-                column_index = _read_column_index(f, column_chunk)
-                offset_index = _read_offset_index(f, column_chunk)
+            for cc in row_group.columns:
+                column_index = _read_column_index(f, cc)
+                offset_index = _read_offset_index(f, cc)
 
                 print("column index: {}\n".format(column_index))
                 print("offset index: {}\n".format(offset_index))
+
+
+        print("\n--- page-headers ---\n")
+        for row_group in metadata.row_groups:
+            for cc in row_group.columns:
+                data_page_offset = cc.meta_data.data_page_offset
+                dictionary_page_offset = cc.meta_data.dictionary_page_offset
+
+                print_page_header(f, data_page_offset)
+                print_page_header(f, dictionary_page_offset)
