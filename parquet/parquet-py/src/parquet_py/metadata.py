@@ -68,6 +68,11 @@ def _print_column_metadata(column: ttypes.ColumnChunk):
     table.add_column("value", overflow="fold")
 
     table.add_row("file_offset", str(column.file_offset))
+    table.add_row("offset_index_offset", str(column.offset_index_offset))
+    table.add_row("offset_index_length", str(column.offset_index_length))
+    table.add_row("column_index_offset", str(column.column_index_offset))
+    table.add_row("column_index_length", str(column.column_index_length))
+
     table.add_row("type", _resolve_enum(metadata.type, ttypes.Type))
     table.add_row("encodings", str(metadata.encodings))
     table.add_row("path_in_schema", str(metadata.path_in_schema))

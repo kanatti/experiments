@@ -29,7 +29,7 @@ def _check_magic_footer(file) -> bool:
     return _check_magic(file, -len(MAGIC), 2)
 
 
-def _read_thrift_structure(file, struct_class) -> any:
+def _read_thrift_structure(file, struct_class) -> ttypes.FileMetaData:
     transport = TTransport.TFileObjectTransport(file)
     # All thrift structures are serialized using TCompactProtocol.
     protocol = TCompactProtocol.TCompactProtocol(transport)
@@ -39,7 +39,7 @@ def _read_thrift_structure(file, struct_class) -> any:
     return structure
 
 
-def _read_metadata(file):
+def _read_metadata(file) -> ttypes.FileMetaData:
     # Seek to read metadata length.
     file.seek(-METADATA_LENGTH_START, 2)
     # Metadata is stored as little endian.
@@ -60,6 +60,17 @@ def _project_dir() -> Path:
 def _test_data(filename):
     return os.path.join(_project_dir(), "test-data", filename)
 
+def _read_column_index(file, cc: ttypes.ColumnChunk) -> ttypes.ColumnIndex:
+    offset = cc.column_index_offset
+    file.seek(offset)
+    index = _read_thrift_structure(file, ttypes.ColumnIndex)
+    return index
+
+def _read_offset_index(file, cc: ttypes.ColumnChunk) -> ttypes.OffsetIndex:
+    offset = cc.offset_index_offset
+    file.seek(offset)
+    index = _read_thrift_structure(file, ttypes.OffsetIndex)
+    return index
 
 def read_example():
     sample_parquet = _test_data("nation.parquet")
@@ -71,3 +82,12 @@ def read_example():
             raise exceptions.InvalidParquetFile("Missing footer magic")
         metadata = _read_metadata(f)
         print_metadata(metadata)
+
+        print("\n--- index ---\n")
+        for row_group in metadata.row_groups:
+            for column_chunk in row_group.columns:
+                column_index = _read_column_index(f, column_chunk)
+                offset_index = _read_offset_index(f, column_chunk)
+
+                print("column index: {}\n".format(column_index))
+                print("offset index: {}\n".format(offset_index))
