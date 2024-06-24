@@ -1,2 +1,3 @@
 [workspace]
-members = ["fsfs", "cor", "external/*"]
+members = ["fsfs", "cor", "parquet/parquet-rs"]
+resolver = "2"
