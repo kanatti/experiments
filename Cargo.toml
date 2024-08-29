@@ -1,3 +1,0 @@
-[workspace]
-members = ["fsfs", "cor", "parquet/parquet-rs", "smallvec"]
-resolver = "2"
